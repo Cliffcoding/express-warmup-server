@@ -7,6 +7,37 @@ const authMiddleware = require('../auth/middleware');
 
 const router = express.Router();
 
+router.get('/users', (req,res,next) => {
+  queries.getAllUsers().then(users => {
+    res.json(users);
+  });
+});
+
+router.get('/users/:id', (req,res,next) => {
+  queries.getUserById(req.params.id).then(user => {
+    res.json(user)
+  })
+})
+router.delete('/users/:id', (req,res,next) => {
+  queries.deleteUser(req.params.id).then(deleted => {
+    res.json(deleted);
+  })
+})
+router.put('/users/:id', (req,res,next) => {
+  queries.getUserById(req.params.id).then(user => {
+    bcrypt.hash(req.body.password, 8)
+     .then((hash) => {
+       let user = {
+         email: req.body.email,
+         password:hash
+       };
+      queries.updateUser(req.params.id, user).then(user => {
+        res.json(user);
+      });
+      });
+    })
+});
+
 router.post('/auth/login', (req,res,next) => {
   if(valid.user(req.body)){
     queries.getUserByEmail(req.body.email).then(user => {
